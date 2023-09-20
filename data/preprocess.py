@@ -1,6 +1,6 @@
 import re
 from collections import Counter
-from config import output_chars, spacy_model
+from config import n_keywords, output_chars, spacy_model
 
 import torch
 import numpy as np
@@ -23,7 +23,7 @@ def extract_keywords(words):
     words = nlp(words)
     nouns = [w.text for w in words if w.pos_ in ["NOUN", "PROPN"]]
     noun_counts = Counter(nouns)
-    keywords = [kw for (kw, count) in noun_counts.most_common(4)]
+    keywords = [kw for (kw, count) in noun_counts.most_common(n_keywords)]
     return keywords
 
 def keyword_vector(keywords):
