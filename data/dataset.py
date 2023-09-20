@@ -23,17 +23,25 @@ transform = transforms.Compose([
     preprocess.Ascii(len(output_chars))
 ])
 
+target_transform = transforms.Compose([
+    preprocess.tokenize_captions,
+    preprocess.extract_keywords,
+    preprocess.keyword_vector
+])
+
 
 coco_train = CocoCaptions(
     root=coco_train_data_path,
     annFile=coco_train_annfile_path,
-    transform=transform
+    transform=transform,
+    target_transform=target_transform
 )
 
 coco_val = CocoCaptions(
     root=coco_val_data_path,
     annFile=coco_val_annfile_path,
-    transform=transform
+    transform=transform,
+    target_transform=target_transform
 )
 
 
