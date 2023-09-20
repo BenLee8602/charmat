@@ -10,7 +10,7 @@ nlp = spacy.load(spacy_model)
 
 
 def ascii_indexing(image):
-    return torch.round(image * len(output_chars))
+    return torch.round(image * (len(output_chars) - 1))
 
 
 def flatten_captions(captions):

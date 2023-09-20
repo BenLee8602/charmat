@@ -37,8 +37,3 @@ coco_val = CocoCaptions(
 
 dl_train = DataLoader(coco_train, batch_size=cfg.batch_size, shuffle=True)
 dl_val = DataLoader(coco_val, batch_size=cfg.batch_size, shuffle=False)
-
-# testing
-for (x, y) in dl_val:
-    print(x, y)
-    break
