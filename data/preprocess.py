@@ -2,10 +2,10 @@ import re
 from collections import Counter
 
 import torch
+import numpy as np
 
-import nltk
-from nltk import pos_tag
-from nltk.corpus import stopwords
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
 
 class Ascii:
@@ -16,23 +16,22 @@ class Ascii:
         return torch.round(x * self.char_count)
 
 
-def tokenize_captions(captions):
+def flatten_captions(captions):
     captions = ' '.join(captions)
     captions = captions.lower()
     captions = re.sub("[^a-z ]+", "", string=captions)
-    return captions.split()
+    return captions
+
 
 def extract_keywords(words):
-    stop_words = set(stopwords.words("english"))
-    words = [w for w in words if w not in stop_words]
-
-    tagged_words = pos_tag(words)
-    nouns = [w for (w, tag) in tagged_words if tag.startswith("NN")]
-
-    nouns = Counter(nouns)
-    keywords = [kw for (kw, count) in nouns.most_common(4)]
-
+    words = nlp(words)
+    nouns = [w.text for w in words if w.pos_ in ["NOUN", "PROPN"]]
+    noun_counts = Counter(nouns)
+    keywords = [kw for (kw, count) in noun_counts.most_common(4)]
     return keywords
+
 
 def keyword_vector(keywords):
-    return keywords
+    vectors = [nlp(kw).vector for kw in keywords]
+    kw_vector = np.mean(vectors, axis=0)
+    return kw_vector

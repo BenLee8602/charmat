@@ -24,7 +24,7 @@ transform = transforms.Compose([
 ])
 
 target_transform = transforms.Compose([
-    preprocess.tokenize_captions,
+    preprocess.flatten_captions,
     preprocess.extract_keywords,
     preprocess.keyword_vector
 ])
