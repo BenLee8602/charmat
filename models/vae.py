@@ -1,4 +1,4 @@
-from torch import nn
+from torch import nn, Tensor
 
 class Vae(nn.Module):
     def __init__(self,
@@ -30,14 +30,22 @@ class Vae(nn.Module):
             in_dim = d
         self.decoder = nn.Sequential(*decoder_layers)
 
-    def encode(self, x):
-        pass
+
+    def encode(self, x: Tensor) -> Tensor:
+        out = self.encoder(x)
+        mu = self.get_mu(out)
+        logv = self.get_logv(out)
+        return [mu, logv]
+
 
     def reparameterize(self, mu, logvar):
         pass
 
-    def decode(self, z):
-        pass
+
+    def decode(self, z: Tensor) -> Tensor:
+        out = self.decoder(z)
+        return out
+        
 
     def forward(self, x):
         pass
