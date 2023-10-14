@@ -1,10 +1,11 @@
+import torch
 from torch import nn, Tensor
 
 class Vae(nn.Module):
     def __init__(self,
                  encode_dims: list[int],
                  latent_dim: int,
-                 decode_dims: list[int] = None):
+                 decode_dims: list[int] | None = None):
         super(Vae, self).__init__()
         if decode_dims is None:
             decode_dims = list(reversed(encode_dims))
@@ -30,22 +31,23 @@ class Vae(nn.Module):
             in_dim = d
         self.decoder = nn.Sequential(*decoder_layers)
 
-
-    def encode(self, x: Tensor) -> Tensor:
+    def encode(self, x: Tensor) -> list[Tensor]:
         out = self.encoder(x)
         mu = self.get_mu(out)
         logv = self.get_logv(out)
         return [mu, logv]
 
-
-    def reparameterize(self, mu, logvar):
-        pass
-
+    def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:
+        std = torch.exp(0.5 * logvar)
+        eps = torch.rand_like(std)
+        return mu + eps * std
 
     def decode(self, z: Tensor) -> Tensor:
         out = self.decoder(z)
         return out
-        
 
-    def forward(self, x):
-        pass
+    def forward(self, x: Tensor) -> list[Tensor]:
+        mu, logv = self.encode(x)
+        z = self.reparameterize(mu, logv)
+        xr = self.decode(z)
+        return [xr, mu, logv]
