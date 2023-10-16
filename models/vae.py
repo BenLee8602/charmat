@@ -1,22 +1,25 @@
 import torch
 from torch import nn, Tensor
 
-class Vae(nn.Module):
+class TextToImageVAE(nn.Module):
     def __init__(self,
                  encode_dims: list[int],
                  latent_dim: int,
                  decode_dims: list[int] | None = None):
-        super(Vae, self).__init__()
+        super(TextToImageVAE, self).__init__()
         if decode_dims is None:
             decode_dims = list(reversed(encode_dims))
         
         # encoder
         in_dim = encode_dims[0]
         encoder_layers = []
-        for d in encode_dims[1:]:
-            encoder_layers.append(nn.Linear(in_dim, d))
-            encoder_layers.append(nn.ReLU())
-            in_dim = d
+        for dim in encode_dims[1:]:
+            encoder_layers.append(nn.Sequential(
+                nn.Conv1d(in_dim, dim, 3, 2),
+                nn.BatchNorm1d(dim),
+                nn.ReLU()
+            ))
+            in_dim = dim
         self.encoder = nn.Sequential(*encoder_layers)
         
         self.get_mu = nn.Linear(encode_dims[-1], latent_dim)
@@ -25,10 +28,13 @@ class Vae(nn.Module):
         # decoder
         in_dim = latent_dim
         decoder_layers = []
-        for d in decode_dims:
-            decoder_layers.append(nn.Linear(in_dim, d))
-            decoder_layers.append(nn.ReLU())
-            in_dim = d
+        for dim in decode_dims:
+            decoder_layers.append(nn.Sequential(
+                nn.ConvTranspose2d(in_dim, dim, 3, 2),
+                nn.BatchNorm2d(dim),
+                nn.ReLU()
+            ))
+            in_dim = dim
         self.decoder = nn.Sequential(*decoder_layers)
 
     def encode(self, x: Tensor) -> list[Tensor]:
