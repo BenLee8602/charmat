@@ -5,10 +5,12 @@ class TextToImageVAE(nn.Module):
     def __init__(self,
                  encode_dims: list[int],
                  latent_dim: int,
-                 decode_dims: list[int] | None = None):
+                 decode_dims: list[int] | None = None,
+                 eps: Tensor | None = None):
         super(TextToImageVAE, self).__init__()
         if decode_dims is None:
             decode_dims = list(reversed(encode_dims))
+        self.eps = eps
         
         # encoder
         in_dim = encode_dims[0]
@@ -45,8 +47,9 @@ class TextToImageVAE(nn.Module):
 
     def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:
         std = torch.exp(0.5 * logvar)
-        eps = torch.rand_like(std)
-        return mu + eps * std
+        eps = self.eps if self.eps else torch.rand_like(std)
+        z = mu + eps * std
+        return [z, eps]
 
     def decode(self, z: Tensor) -> Tensor:
         out = self.decoder(z)
@@ -54,6 +57,6 @@ class TextToImageVAE(nn.Module):
 
     def forward(self, x: Tensor) -> list[Tensor]:
         mu, logv = self.encode(x)
-        z = self.reparameterize(mu, logv)
+        z, eps = self.reparameterize(mu, logv)
         xr = self.decode(z)
-        return [xr, mu, logv]
+        return [xr, mu, logv, eps]
