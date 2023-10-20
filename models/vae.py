@@ -45,8 +45,8 @@ class TextToImageVAE(nn.Module):
         logv = self.get_logv(out)
         return [mu, logv]
 
-    def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:
-        std = torch.exp(0.5 * logvar)
+    def reparameterize(self, mu: Tensor, logv: Tensor) -> Tensor:
+        std = torch.exp(0.5 * logv)
         eps = self.eps if self.eps else torch.rand_like(std)
         z = mu + eps * std
         return [z, eps]
